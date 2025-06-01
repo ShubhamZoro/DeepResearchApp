@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
-from agents import Agent
-from agents.model_settings import ModelSettings, WebSearchTool
+from agents import Agent, ModelSettings,WebSearchTool
+
 load_dotenv(override=True)
 
 INSTRUCTIONS = "You are a research assistant. Given a search term, you search the web for that term and \
