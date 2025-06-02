@@ -14,8 +14,8 @@ import os
 nest_asyncio.apply()
 load_dotenv(override=True)
 st.set_page_config(page_title="Deep Research", layout="wide")
-os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
-os.environ["SENDGRID_API_KEY"] = st.secrets['SENDGRID_API_KEY']
+# os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
+# os.environ["SENDGRID_API_KEY"] = st.secrets['SENDGRID_API_KEY']
 # Init DB
 init_db()
 
