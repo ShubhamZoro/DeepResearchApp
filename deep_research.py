@@ -26,6 +26,10 @@ if "query" not in st.session_state:
     st.session_state.query = ""
 if "clarification" not in st.session_state:
     st.session_state.clarification = ""
+if "processing_question" not in st.session_state:
+    st.session_state.processing_question = False
+if "current_question" not in st.session_state:
+    st.session_state.current_question = ""
 
 manager = ResearchManager()
 
@@ -145,34 +149,55 @@ else:
             st.rerun()
     
     elif st.session_state.research_step == 3:
-        # Step 3: Run full pipeline
-        st.subheader("Step 3: Running Research")
-        st.markdown("### ⏳ Running full research based on your input...")
+        # Step 3: Run full pipeline - but maintain chat history
+        current_session_name = get_session_name(st.session_state.current_session_id)
+        st.title(f"🔍 {current_session_name}")
         
-        placeholder = st.empty()
+        # Always show existing chat history first
+        chat_history = get_chat_history(st.session_state.current_session_id)
         
-        full_query = f"{st.session_state.query}\n\nUser clarification:\n{st.session_state.clarification}"
+        if chat_history:
+            st.subheader("Previous Conversation")
+            for role, content, timestamp in chat_history:
+                if role == "user":
+                    with st.chat_message("user"):
+                        st.write(content)
+                else:
+                    with st.chat_message("assistant"):
+                        st.write(content)
+            
+            st.divider()
         
-        async def run(query):
-            output = ""
-            async for chunk in manager.run(query):
-                output += chunk + "\n\n"
-                placeholder.markdown(output)
-            save_message(st.session_state.current_session_id, "assistant", output)
-            st.session_state.research_step = 4  # Move to chat mode
-            st.rerun()
+        # Show current research processing
+        st.subheader("🔍 Current Research in Progress")
         
-        # Run the research
-        asyncio.run(run(full_query))
+        with st.chat_message("assistant"):
+            placeholder = st.empty()
+            
+            full_query = f"{st.session_state.query}\n\nUser clarification:\n{st.session_state.clarification}"
+            
+            async def run_research():
+                output = ""
+                async for chunk in manager.run(full_query):
+                    output += chunk + "\n\n"
+                    placeholder.markdown(f"⚡ **Research Progress:**\n\n{output}")
+                
+                # Save the final output
+                save_message(st.session_state.current_session_id, "assistant", output)
+                st.session_state.research_step = 4  # Move to chat mode
+                st.rerun()
+            
+            # Run the research
+            asyncio.run(run_research())
     
     elif st.session_state.research_step == 4:
         # Chat mode - show all messages and allow new questions
-        st.subheader("Chat History & Continue Conversation")
+        st.subheader("Research Conversation")
         
-        # Display chat history
+        # Always display chat history first
         chat_history = get_chat_history(st.session_state.current_session_id)
         
-        # Create a scrollable container for chat history
+        # Create a container for chat history that stays visible
         chat_container = st.container()
         
         with chat_container:
@@ -184,53 +209,88 @@ else:
                     with st.chat_message("assistant"):
                         st.write(content)
         
-        st.divider()
+        # Check if we're currently processing a question
+        if "processing_question" in st.session_state and st.session_state.processing_question:
+            # Show processing status while maintaining chat history
+            with st.chat_message("assistant"):
+                processing_placeholder = st.empty()
+                
+                # Process the question
+                async def process_question():
+                    question = st.session_state.current_question
+                    output = ""
+                    
+                    # Check if this looks like a new research request
+                    research_keywords = ["research", "analyze", "study", "investigate", "explore", "find information about"]
+                    
+                    if any(keyword in question.lower() for keyword in research_keywords):
+                        # Full research pipeline
+                        processing_placeholder.markdown("🔍 **Planning searches...**")
+                        
+                        async for chunk in manager.run(question):
+                            output += chunk + "\n\n"
+                            processing_placeholder.markdown(f"⚡ **Processing Research...**\n\n{output}")
+                    else:
+                        # Simple follow-up - you can customize this logic
+                        processing_placeholder.markdown("🤔 **Thinking...**")
+                        await asyncio.sleep(1)  # Simulate processing
+                        output = f"Thank you for your follow-up question: '{question}'\n\nThis appears to be a follow-up question. For comprehensive research on this topic, please use the 'New Research' button or include research keywords in your question."
+                        processing_placeholder.markdown(output)
+                    
+                    # Save the response
+                    save_message(st.session_state.current_session_id, "assistant", output)
+                    
+                    # Clear processing state
+                    st.session_state.processing_question = False
+                    st.session_state.current_question = ""
+                    
+                    # Rerun to show updated chat
+                    st.rerun()
+                
+                # Run the processing
+                asyncio.run(process_question())
         
-        # Input for new questions
-        st.subheader("Ask a Follow-up Question")
+        # Input section at the bottom
+        st.divider()
+        st.subheader("💬 Continue Conversation")
         
         # Create a form for the chat input
         with st.form("chat_form", clear_on_submit=True):
             new_question = st.text_area(
-                "Continue the conversation:",
+                "Ask a follow-up question or start new research:",
                 placeholder="Ask a follow-up question, request clarification, or start a new research topic...",
-                height=100
+                height=100,
+                key="new_question_input"
             )
             
-            col1, col2, col3 = st.columns([1, 1, 2])
+            col1, col2 = st.columns([1, 1])
             
             with col1:
-                submit_chat = st.form_submit_button("Send Message", use_container_width=True)
+                submit_chat = st.form_submit_button("💬 Send Message", use_container_width=True)
             
             with col2:
-                submit_research = st.form_submit_button("New Research", use_container_width=True, type="secondary")
+                submit_research = st.form_submit_button("🔍 New Research", use_container_width=True, type="secondary")
         
         # Handle form submissions
         if submit_chat and new_question:
-            # Save user message
+            # Save user message immediately
             save_message(st.session_state.current_session_id, "user", new_question)
             
-            # Simple response for follow-up (you can enhance this with more sophisticated logic)
-            st.session_state.query = new_question
-            st.session_state.clarification = ""
+            # Set processing state
+            st.session_state.processing_question = True
+            st.session_state.current_question = new_question
             
-            # Check if this looks like a new research request
-            research_keywords = ["research", "analyze", "study", "investigate", "explore", "find information about"]
-            if any(keyword in new_question.lower() for keyword in research_keywords):
-                st.session_state.research_step = 2  # Go to clarification
-            else:
-                # For simple questions, you might want to implement a simpler Q&A agent
-                # For now, we'll treat it as a new research topic
-                st.session_state.research_step = 2
-            
+            # Rerun to show the user message and start processing
             st.rerun()
         
         if submit_research and new_question:
+            # Save user message
+            save_message(st.session_state.current_session_id, "user", f"🔍 New research request: {new_question}")
+            
             # Start new research process
             st.session_state.query = new_question
             st.session_state.clarification = ""
             st.session_state.research_step = 2  # Go to clarification step
-            save_message(st.session_state.current_session_id, "user", f"New research request: {new_question}")
             st.rerun()
     
     # Show session management options
@@ -240,3 +300,4 @@ else:
         st.session_state.query = ""
         st.session_state.clarification = ""
         st.rerun()
+
