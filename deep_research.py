@@ -13,7 +13,8 @@ from datetime import datetime
 nest_asyncio.apply()
 load_dotenv(override=True)
 st.set_page_config(page_title="Deep Research", layout="wide")
-
+os.environ["OPENAI_API_KEY"] = st.secrets['openai_api_key']
+os.environ["SENDGRID_API_KEY"] = st.secrets['sendgrid_api_key']
 # Init DB
 init_db()
 
