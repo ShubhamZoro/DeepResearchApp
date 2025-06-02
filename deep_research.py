@@ -8,6 +8,7 @@ from chat_db import (
     get_all_sessions, update_session_name, delete_session, get_session_name
 )
 from datetime import datetime
+import os
 
 # Setup
 nest_asyncio.apply()
