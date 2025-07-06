@@ -105,7 +105,6 @@ if st.session_state.current_session_id is None:
     - Multi-step research process with AI agents
     - Web search and analysis
     - Comprehensive report generation
-    - Email delivery of results
     - Session-based chat history
     """)
 
