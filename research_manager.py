@@ -21,8 +21,8 @@ class ResearchManager:
             yield "📝 Writing final report..."
             report = await self.write_report(query, search_results)
 
-            yield "📧 Sending report to your email..."
-            await self.send_email(report)
+            # yield "📧 Sending report to your email..."
+            # await self.send_email(report)
 
             yield "✅ Research complete. Check your inbox!"
             yield report.markdown_report
