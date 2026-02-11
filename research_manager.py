@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 from agents import Runner, trace, gen_trace_id
 from email_agent import email_agent
 from planner_agent import planner_agent, WebSearchItem, WebSearchPlan
@@ -10,7 +11,7 @@ class ResearchManager:
         """Run the deep research process, yielding status updates and final report."""
         trace_id = gen_trace_id()
         with trace("Research trace", trace_id=trace_id):
-            yield f"🔗 View trace: https://platform.openai.com/traces/trace?trace_id={trace_id}"
+            #yield f"🔗 View trace: https://platform.openai.com/traces/trace?trace_id={trace_id}"
 
             yield "🔍 Planning searches..."
             search_plan = await self.plan_searches(query)
@@ -28,7 +29,11 @@ class ResearchManager:
             yield report.markdown_report
 
     async def plan_searches(self, query: str) -> WebSearchPlan:
-        result = await Runner.run(planner_agent, f"Query: {query}")
+        current_date = datetime.now().strftime('%B %d, %Y')
+        result = await Runner.run(
+            planner_agent,
+            f"Today's date is {current_date}. Focus on finding the LATEST information.\n\nQuery: {query}"
+        )
         return result.final_output_as(WebSearchPlan)
 
     async def perform_searches(self, search_plan: WebSearchPlan) -> list[str]:
