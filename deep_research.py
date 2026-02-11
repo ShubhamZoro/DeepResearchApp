@@ -32,6 +32,10 @@ if "processing_question" not in st.session_state:
     st.session_state.processing_question = False
 if "current_question" not in st.session_state:
     st.session_state.current_question = ""
+if "sending_email" not in st.session_state:
+    st.session_state.sending_email = False
+if "email_sent" not in st.session_state:
+    st.session_state.email_sent = False
 
 manager = ResearchManager()
 
@@ -293,6 +297,52 @@ else:
             st.session_state.clarification = ""
             st.session_state.research_step = 2  # Go to clarification step
             st.rerun()
+        
+        # Email Report Section
+        st.divider()
+        st.subheader("📧 Email Report")
+        
+        if st.session_state.email_sent:
+            st.success("✅ Report sent successfully!")
+            if st.button("Send to another email"):
+                st.session_state.email_sent = False
+                st.session_state.sending_email = False
+                st.rerun()
+        elif st.session_state.sending_email:
+            with st.form("email_form", clear_on_submit=False):
+                email_address = st.text_input(
+                    "Enter recipient email:",
+                    placeholder="your-email@example.com"
+                )
+                send_btn = st.form_submit_button("📤 Send Report", use_container_width=True)
+            
+            if send_btn and email_address:
+                # Get the latest assistant message (the report)
+                report_content = ""
+                for role, content, timestamp in reversed(chat_history):
+                    if role == "assistant":
+                        report_content = content
+                        break
+                
+                if report_content:
+                    with st.spinner("📧 Sending report..."):
+                        async def send_report_email():
+                            await manager.send_email_report(report_content, email_address.strip())
+                        asyncio.run(send_report_email())
+                    st.session_state.email_sent = True
+                    st.session_state.sending_email = False
+                    st.rerun()
+                else:
+                    st.error("No report found to send.")
+            
+            if st.button("Cancel"):
+                st.session_state.sending_email = False
+                st.rerun()
+        else:
+            if st.button("📧 Send Report via Email", use_container_width=True):
+                st.session_state.sending_email = True
+                st.session_state.email_sent = False
+                st.rerun()
     
     # Show session management options
     st.sidebar.divider()

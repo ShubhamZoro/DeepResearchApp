@@ -7,7 +7,7 @@ from writer_agent import writer_agent, ReportData
 from search_agent import search_agent
 
 class ResearchManager:
-    async def run(self, query: str):
+    async def run(self, query: str, recipient_email: str = None):
         """Run the deep research process, yielding status updates and final report."""
         trace_id = gen_trace_id()
         with trace("Research trace", trace_id=trace_id):
@@ -22,10 +22,12 @@ class ResearchManager:
             yield "📝 Writing final report..."
             report = await self.write_report(query, search_results)
 
-            # yield "📧 Sending report to your email..."
-            # await self.send_email(report)
-
-            yield "✅ Research complete. Check your inbox!"
+            if recipient_email:
+                yield f"📧 Sending report to {recipient_email}..."
+                await self.send_email(report, recipient_email)
+                yield f"✅ Research complete. Report sent to {recipient_email}!"
+            else:
+                yield "✅ Research complete!"
             yield report.markdown_report
 
     async def plan_searches(self, query: str) -> WebSearchPlan:
@@ -61,5 +63,15 @@ class ResearchManager:
         result = await Runner.run(writer_agent, input_text)
         return result.final_output_as(ReportData)
 
-    async def send_email(self, report: ReportData) -> None:
-        await Runner.run(email_agent, report.markdown_report)
+    async def send_email(self, report: ReportData, recipient_email: str) -> None:
+        await Runner.run(
+            email_agent,
+            f"Send this report to {recipient_email}.\n\nReport:\n{report.markdown_report}"
+        )
+
+    async def send_email_report(self, report_content: str, recipient_email: str) -> None:
+        """Send a report via email given raw report content and recipient email."""
+        await Runner.run(
+            email_agent,
+            f"Send this report to {recipient_email}.\n\nReport:\n{report_content}"
+        )

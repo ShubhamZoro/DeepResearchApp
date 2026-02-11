@@ -12,6 +12,8 @@ An AI-powered deep research assistant built with **Streamlit** and **OpenAI Agen
 
 - **Recency-First Approach** — Prioritizes recent, confirmed research and developments over speculative future predictions
 
+- **Email Reports** — After a report is generated, send it directly to any email address via Gmail SMTP
+
 - **Session Management** — Create, switch between, and delete research sessions with full chat history
 
 - **Interactive Follow-ups** — Continue the conversation with follow-up questions or start new research within the same session
@@ -26,6 +28,7 @@ An AI-powered deep research assistant built with **Streamlit** and **OpenAI Agen
 
 - Python 3.10+
 - An OpenAI API key
+- A Gmail account with App Password (for email feature)
 
 ### Installation
 
@@ -45,7 +48,13 @@ An AI-powered deep research assistant built with **Streamlit** and **OpenAI Agen
    Create a `.env` file in the root directory:
    ```env
    OPENAI_API_KEY=your-openai-api-key-here
+
+   # Optional: for email feature
+   GMAIL_EMAIL=your-gmail@gmail.com
+   GMAIL_APP_PASSWORD=your-16-char-app-password
    ```
+
+   > **Gmail App Password Setup:** Go to [Google Account → Security](https://myaccount.google.com/security) → Enable 2-Step Verification → App Passwords → Generate one for "Mail"
 
 4. **Run the app**
    ```bash
@@ -72,6 +81,10 @@ User Query
        ▼
 ┌──────────────┐
 │ Writer Agent  │  ← Produces a detailed markdown report (1000+ words)
+└──────┬───────┘
+       ▼
+┌──────────────┐
+│ Email Agent   │  ← (Optional) Sends report via Gmail SMTP
 └──────────────┘
 ```
 
@@ -85,7 +98,7 @@ User Query
 | `search_agent.py` | Performs web searches and extracts latest findings |
 | `writer_agent.py` | Writes the final comprehensive report |
 | `clarify_agent.py` | Generates clarifying questions for the user |
-| `email_agent.py` | (Optional) Sends the report via email |
+| `email_agent.py` | Sends reports via Gmail SMTP |
 | `chat_db.py` | SQLite-based chat history and session storage |
 
 ## 🛠️ Tech Stack
@@ -95,6 +108,7 @@ User Query
 - **LLM**: GPT-4o-mini
 - **Database**: SQLite (via SQLAlchemy)
 - **Web Search**: OpenAI WebSearchTool
+- **Email**: Gmail SMTP (no SendGrid dependency)
 
 ## 📄 License
 
