@@ -4,7 +4,7 @@ from agents import Agent, ModelSettings,WebSearchTool
 load_dotenv(override=True)
 
 INSTRUCTIONS = "You are a research assistant. Given a search term, you search the web for that term and \
-produce a concise summary of the results of latest finding. The summary must 4-5 paragraphs and less than 500 \
+produce a concise summary of the results of latest finding of thing done with 2 year of time. The summary must 4-5 paragraphs and less than 500 \
 words. Capture the main points. Write succintly, no need to have complete sentences or good \
 grammar. This will be consumed by someone synthesizing a report, so it's vital you capture the \
 essence and ignore any fluff. Do not include any additional commentary other than the summary itself."
