@@ -139,8 +139,6 @@ else:
         prompt_html = """
         <div style="background-color: #f0f2f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
             Could you please clarify what you're looking for regarding your topic?
-            Are you interested in specific tools, building one yourself, or understanding capabilities?
-            Also, what features or use cases are most important to you?
         </div>
         """
         st.markdown(prompt_html, unsafe_allow_html=True)

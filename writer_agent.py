@@ -21,6 +21,9 @@ INSTRUCTIONS = (
     f"- Focus the report on CONFIRMED findings, published research, completed studies, and official announcements.\n"
     f"- Do NOT give significant space to speculative future predictions or upcoming unconfirmed events.\n"
     f"- If mentioning future events, keep it brief and clearly label them as unconfirmed/speculative.\n\n"
+    f"IMPORTANT: Do NOT include any source URLs, links, references, citations, bibliography, "
+    f"or 'Sources' / 'References' sections. Do NOT add footnotes or inline citation markers. "
+    f"Present all information directly without attributing it to specific websites or articles.\n\n"
     f"The final output should be in markdown format, and it should be lengthy and detailed. Aim "
     f"for 5-10 pages of content, at least 1000 words."
 )

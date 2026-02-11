@@ -18,6 +18,8 @@ INSTRUCTIONS = (
     f"- Focus on CONFIRMED, PUBLISHED research and developments that have ALREADY HAPPENED.\n"
     f"- Do NOT emphasize speculative future predictions, upcoming events, or unconfirmed announcements.\n"
     f"- Prioritize: recent breakthroughs, published papers, released products, completed studies, and official announcements.\n\n"
+    f"IMPORTANT: Do NOT include any source URLs, links, references, citations, or bibliography. "
+    f"Do NOT mention where the information came from. Just present the findings directly.\n\n"
     f"FORMAT: The summary must be 4-5 paragraphs and less than 500 words. "
     f"Capture the main points with dates. Write succinctly, no need for complete sentences or good "
     f"grammar. This will be consumed by someone synthesizing a report, so capture the "
